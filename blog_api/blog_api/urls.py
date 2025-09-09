@@ -15,8 +15,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.http import HttpResponse
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+def home(request):
+    return HttpResponse ("Welcome to Blogging API") 
 
 urlpatterns = [
+    path("", home),
     path('admin/', admin.site.urls),
+
+    # JWT auth
+    path('auth/jwt/create/', TokenObtainPairView.as_view(), name='jwt-create'),
+    path('auth/jwt/refresh/', TokenRefreshView.as_view(), name='jwt-refresh'),
+
+    path("auth/", include("blog.urls")),  # Include your app urls here
+
+    # Djoser endpoints
+    path('auth/', include('djoser.urls')),  # user management
+    path('auth/', include('djoser.urls.jwt')) # JWT-specific endpoints
+
+
 ]
