@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static
 
 def home(request):
     return HttpResponse ("Welcome to Blogging API") 
@@ -31,10 +33,12 @@ urlpatterns = [
     path('auth/jwt/refresh/', TokenRefreshView.as_view(), name='jwt-refresh'),
 
     path("auth/", include("blog.urls")),  # Include your app urls here
+    
 
     # Djoser endpoints
     path('auth/', include('djoser.urls')),  # user management
     path('auth/', include('djoser.urls.jwt')) # JWT-specific endpoints
-
-
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
