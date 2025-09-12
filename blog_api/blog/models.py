@@ -26,5 +26,26 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-    
+class Comment(models.Model):
+    post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)  # no name parameter
+    author = models.ForeignKey(User, on_delete=models.CASCADE)  # no name parameter
+    content = models.TextField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.post}"
+
+
+# class Comment(models.Model):
+#     post = models.ForeignKey(Post, on_delete=models.CASCADE, name='post')
+#     author = models.ForeignKey(User, on_delete=models.CASCADE, name='post-author')
+#     content = models.TextField(max_length=1000)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def __str__(self):
+#         return self.author
+
+
 

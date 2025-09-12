@@ -22,7 +22,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 def home(request):
-    return HttpResponse ("Welcome to Blogging API") 
+    return HttpResponse ("Welcome to Blogging API By Wisdom") 
 
 urlpatterns = [
     path("", home),
