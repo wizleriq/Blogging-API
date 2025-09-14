@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     bio = models.TextField(max_length=255)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
@@ -26,6 +27,7 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
 class Comment(models.Model):
     post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)  # no name parameter
     author = models.ForeignKey(User, on_delete=models.CASCADE)  # no name parameter
