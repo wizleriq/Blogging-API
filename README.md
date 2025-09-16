@@ -1,157 +1,95 @@
 # Blogging-API
 Blogging API built with Python, Django, and MySQL
-BLOGGING API
-Creating a Bloggong API using Python, Django and MySQL
-STEP 1:
-a.Create django project: Django-admin startproject Blogging_API
-b.Create django app: Python manage,py startapp Blog
-c.Install Djangorestframework: pip install djangorestframework
-d.Go to setting.py and include the app you created, rest_framework and rest_framework.authtoken as part of installed apps also configure rest_framework and set up media files (for profile picture and post image): 
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'blog',
-    'rest_framework',
-    'rest_framework.authtoken'
-]
+A Django REST Framework (DRF) based Blogging API that allows users to register, create posts, comment, and follow/unfollow other users. This project demonstrates full-stack backend skills including user authentication, permissions, and relationships between models.
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHNTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framwork.permissions.IsAuthenticatedOrReadOnly'
-    ),
-}
+Features
+1. User Authentication
+- User registration with username, email, and password.
+- JWT-based authentication for secure login and access.
+- Supports retrieving and updating user information.
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+2. Profile Management
+- Automatic profile creation upon user registration.
+- View all user profiles (GET /auth/profiles/).
+- Users can update their own profiles.
+- Profiles include:
+- user (username)
+- email
+- bio
+- profile_picture
+- followers & following
+  
+3. Posts
+- Create, list, retrieve, update, and delete posts.
+- Only authors can update or delete their posts.
+  Posts include:
+- author
+- title
+- content
+- created_at & updated_at
 
+4. Comments
+- Create, list, retrieve, update, and delete comments.
+- Only authors can update or delete their comments.
+- Comments are tied to posts and users.
 
-e.Run migrations: Python manage.py makemigrations then python manage.py migrate
-f.Create superuser: Python manage.py create superuser
-g.Run server: Python manage.py runserver
+5. Follow / Unfollow Users
+Logged-in users can follow or unfollow other users’ profiles.
+Endpoints:
+- POST /auth/profiles/<profile_id>/follow/
+- POST /auth/profiles/<profile_id>/unfollow/
+- Prevents following/unfollowing self.
+- Shows followers and following in each profile.
 
-STEP 2:  User Registration and Authentication: models, serializer, viewset, url (endpoints)
-1.I can use the default User model (django.contrib.auth.models.User) or create a custom user model if need extra fields. Or I can use Djoser 
+6. Permissions
+- Authenticated users can create/update their content.
+- Read-only access for unauthenticated users.
+- Proper error handling for unauthorized actions.
 
-USING DJOSER: I suggested using Djoser, which is a Django package that provides ready-made endpoints for:
-POST /auth/users/ → user registration (sign up)
-POST /auth/token/login/ → obtain authentication token (login)
-This handles creating users and issuing tokens without you having to write custom views or serializers.
+- API Endpoints
+User
 
-STEPS: 
-1.Pip install djoser
-2.Pip install djangorestframework-simplejwt
-3.Configure djoser setting:     
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    ...
-    'rest_framework',
-    'rest_framework.authtoken',  # required by djoser
-    'djoser',
-    'blog',  # your app
-]
+Method	Endpoint	Description
+POST	/auth/register/	Register a new user
+POST	/auth/jwt/create/	Login and get JWT token
 
-4.Configure REST Framework with JWT:
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ),
-}
+Read-only access for unauthenticated users.
 
-5.Optional JWT settings (in settings.py)
-from datetime import timedelta
+Proper error handling for unauthorized actions.
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-}
+API Endpoints
+User
+Method	Endpoint	Description
+POST	/auth/register/	Register a new user
+POST	/auth/jwt/create/	Login and get JWT token
 
-6.Configure URLs (urls.py)
-from django.contrib import admin
-from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+Profiles
+Method	Endpoint	Description
+GET	/auth/profiles/	List all profiles
+GET	/auth/profiles/<id>/	Retrieve a profile
+PUT	/auth/profiles/<id>/	Update your profile
+POST	/auth/profiles/<id>/follow/	Follow a user
+POST	/auth/profiles/<id>/unfollow/	Unfollow a user
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
+Posts
+Method	Endpoint	Description
+GET	/auth/posts/	List all posts
+POST	/auth/posts/	Create a post
+GET	/auth/posts/<id>/	Retrieve post details
+PUT	/auth/posts/<id>/	Update a post (author only)
+DELETE	/auth/posts/<id>/	Delete a post (author only)
 
-    # JWT auth
-    path('auth/jwt/create/', TokenObtainPairView.as_view(), name='jwt-create'),
-    path('auth/jwt/refresh/', TokenRefreshView.as_view(), name='jwt-refresh'),
+Comments
+Method	Endpoint	Description
+GET	/auth/comments/	List all comments
+POST	/auth/comments/	Create a comment
+GET	/auth/comments/<id>/	Retrieve a comment
+PUT	/auth/comments/<id>/	Update a comment (author only)
+DELETE	/auth/comments/<id>/	Delete a comment (author only)
 
-    # Djoser endpoints
-    path('auth/', include('djoser.urls')),           # user management
-    path('auth/', include('djoser.urls.jwt')),       # JWT-specific endpoints
-]
-
-7.Run migrations: Python manage.py makemigrations, python manage.py migrate
-
-8.Test the endpoints: 
-POST /auth/users/
-Content-Type: application/json
-
-{
-    "username": "alice",
-    "email": "alice@example.com",
-    "password": "strongpassword"
-}
-
-9.Login (JWT)
-POST /auth/jwt/create/
-Content-Type: application/json
-
-{
-    "username": "alice",
-    "password": "strongpassword"
-}
-{
-    "refresh": "<refresh_token>",
-    "access": "<access_token>"
-}
-
-10.Create a Serializer
-11.Create a view 
-12.Create a url.py: Write it up here (not project level url.py)
-Blog/url.py  
-from django.urls import path
-from .views import RegisterView
-
-urlpatterns = [
-    path("register/", RegisterView.as_view(), name="register"),
-]
-13.Include it in your project level url.py ie. BLOG_API.url.py
-from django.contrib import admin
-from django.urls import path, include
-from django.http import HttpResponse
-
-def home(request):
-    return HttpResponse ("Welcome Home")
-
-urlpatterns = [
-    path("", home),
-    path('admin/', admin.site.urls),
-    path('api/',include ('api.urls'))
-]
-
-14.RUN step 8 and 9
-
-
-STEP 3: Blog Post Management
-
-1.Create a model.py file:
-Class Create(models.Model):
-name: models.Charfield(max_length=100)
-
-
-
-
+Technologies
+- Python 3.12
+- Django 4.x
+- Django REST Framework (DRF)
+- PostgreSQL (or SQLite for development)
+- JWT Authentication
