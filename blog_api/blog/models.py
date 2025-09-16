@@ -6,7 +6,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     # user = models.ForeignKey(User, on_delete=models.CASCADE)
     bio = models.TextField(max_length=255)
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
 
     def __str__(self):

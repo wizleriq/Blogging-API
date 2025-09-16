@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
@@ -79,7 +79,13 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
             raise PermissionDenied("You can't update some's comment")
         else:
             serializer.save()
-    
+
+# Allow users search for post
+class PostSearchAPIView(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['id', 'title', 'content', 'username']
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
@@ -106,6 +112,7 @@ class FollowAPIView(APIView):
         
         my_profile.following.add(profile_to_follow)
         return Response({"message": f"You are following {profile_to_follow.user.username}"})
+    
 #Unfollow a user
 class UnfollowAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
