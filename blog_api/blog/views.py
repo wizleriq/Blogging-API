@@ -4,7 +4,7 @@ from rest_framework import generics, permissions, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
-from .serializers import ProfileSerializer, RegisterSerializer, PostSerializer, CommentSerializer
+from .serializers import ProfileSerializer, UserSerializer, RegisterSerializer, PostSerializer, CommentSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from .models import Post, Comment, Profile
 from rest_framework.exceptions import PermissionDenied
@@ -28,6 +28,13 @@ class ProfileDetailAPIView(generics.RetrieveAPIView):
             serializer.save()
         else: 
             raise PermissionDenied("You can't edit someone else's profile")
+        
+# View Registered User
+class UserListAPIView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 # Registration View
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -64,11 +71,17 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
         else:
             raise PermissionDenied("You cant delete someone else's post")
         
+# Allow users search for post
+class PostSearchAPIView(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['id', 'title', 'content', 'username']
+        
 class CommentListCreateAPIView(generics.ListCreateAPIView):
     queryset = Comment .objects.all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -79,13 +92,6 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
             raise PermissionDenied("You can't update some's comment")
         else:
             serializer.save()
-
-# Allow users search for post
-class PostSearchAPIView(generics.ListAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['id', 'title', 'content', 'username']
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
@@ -127,17 +133,6 @@ class UnfollowAPIView(APIView):
         my_profile.following.remove(profile_to_unfollow)
         return Response({"You are no longer following"}, profile_to_unfollow.user.username)
     
-
-    
-
-
-    
-    
-        
-
-         
-
-
     # def perform_destroy(self, instance):
     #     # print("Request user:", self.request.user)
     #     # print("Post author:", instance.author)
