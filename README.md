@@ -62,6 +62,7 @@ User
 Method	Endpoint	Description
 POST	/auth/register/	Register a new user
 POST	/auth/jwt/create/	Login and get JWT token
+GET	/auth/Users/ to get users
 
 Profiles
 Method	Endpoint	Description
